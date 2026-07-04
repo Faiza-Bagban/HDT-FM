@@ -3,7 +3,6 @@ cat > README.md << 'EOF'
 
 **Multimodal Self-Evolving Digital Twin for Predictive Healthcare**
 
-Conference paper implementation — DIAT Research Internship 2025.
-
+Conference paper implementation
 
 ## Structure
