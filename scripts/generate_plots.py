@@ -248,6 +248,8 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')
 import seaborn as sns
+matplotlib.rcParams['font.weight'] = 'bold'
+matplotlib.rcParams['axes.labelweight'] = 'bold'
 
 os.makedirs("results/figures", exist_ok=True)
 
