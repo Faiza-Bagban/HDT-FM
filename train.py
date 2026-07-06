@@ -197,7 +197,7 @@ def main():
             best_val_f1 = val_f1
             torch.save(model.state_dict(),
                        os.path.join(CFG["ckpt_dir"], "best_model.pt"))
-            print(f"  ★ New best model (val_f1={val_f1:.4f})")
+            print(f"  * New best model (val_f1={val_f1:.4f})")
 
     print(f"\nTraining complete. Best val F1: {best_val_f1:.4f}")
     if WANDB_AVAILABLE:
