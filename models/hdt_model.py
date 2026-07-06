@@ -113,9 +113,9 @@ class HDTModel(nn.Module):
         temporal_out = self.temporal(temporal_in)  # (B, 256)
 
         # --- Twin Simulator ---
-        next_state = self.twin_sim(temporal_out)   # (B, 256)
+        next_state, recon = self.twin_sim(temporal_out)  # (B,256), (B,20)
 
         # --- Risk Head ---
         logits = self.risk_head(temporal_out)       # (B, 3)
 
-        return logits, fused, next_state
+        return logits, fused, next_state, recon

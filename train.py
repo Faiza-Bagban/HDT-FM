@@ -128,12 +128,12 @@ def main():
             optimizer.zero_grad()
 
             with torch.amp.autocast("cuda", enabled=(CFG["device"] == "cuda")):
-                logits, fused, next_state = model(audio, activity, mobility)
+                logits, fused, next_state, recon = model(audio, activity, mobility)
                 loss_ce = ce_loss(logits, labels)
-                # Twin self-supervised: next state ≈ shifted fused states
-                loss_twin = twin_loss_fn(
-                    next_state, fused.detach().roll(1, dims=0)
-                )
+                # Twin self-supervised: reconstruct original activity features
+                # activity is (B,128) padded — recon targets first 20 cols (real HRV)
+                recon_target = activity[:, :20]  # (B, 20) raw HRV features
+                loss_twin = twin_loss_fn(recon, recon_target)
                 loss = loss_ce + CFG["twin_loss_w"] * loss_twin
 
             scaler_amp.scale(loss).backward()
@@ -167,7 +167,7 @@ def main():
                 if args.no_mobility: mobility = torch.zeros_like(mobility)
 
                 with torch.amp.autocast("cuda", enabled=(CFG["device"] == "cuda")):
-                    logits, _, _ = model(audio, activity, mobility)
+                    logits, _, _, _ = model(audio, activity, mobility)
                 all_preds.extend(logits.argmax(-1).cpu().tolist())
                 all_labels.extend(labels.cpu().tolist())
 
