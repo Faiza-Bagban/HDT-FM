@@ -39,8 +39,17 @@ parser.add_argument("--use_encoders", action="store_true", default=False,
 args = parser.parse_args()
 
 
-def get_dummy_audio(batch_size, device):
-    return torch.randn(batch_size, 16000).to(device)
+import numpy as np
+
+# Load real CREMA-D voice embeddings (pre-projected 256-d)
+_voice_np = np.load("data/embeddings/voice_trained.npy")  # (240, 256)
+_voice_bank = torch.tensor(_voice_np, dtype=torch.float32)
+print(f"Loaded {_voice_bank.shape[0]} voice embeddings ({_voice_bank.shape[1]}-d)")
+
+def get_voice_emb(batch_size, device):
+    """Sample random real voice embeddings from CREMA-D bank."""
+    idx = torch.randint(0, len(_voice_bank), (batch_size,))
+    return _voice_bank[idx].to(device)
 
 
 def main():
@@ -119,16 +128,16 @@ def main():
             else:
                 activity, mobility, labels = [x.to(CFG["device"]) for x in batch_data]
 
-            audio = get_dummy_audio(activity.shape[0], CFG["device"])
+            voice_emb = get_voice_emb(activity.shape[0], CFG["device"])
 
-            if args.no_voice:    audio    = torch.zeros_like(audio)
+            if args.no_voice:    voice_emb = torch.zeros_like(voice_emb)
             if args.no_activity: activity = torch.zeros_like(activity)
             if args.no_mobility: mobility = torch.zeros_like(mobility)
 
             optimizer.zero_grad()
 
             with torch.amp.autocast("cuda", enabled=(CFG["device"] == "cuda")):
-                logits, fused, next_state, recon = model(audio, activity, mobility)
+                logits, fused, next_state, recon = model(voice_emb=voice_emb, activity=activity, mobility=mobility)
                 loss_ce = ce_loss(logits, labels)
                 # Twin self-supervised: reconstruct original activity features
                 # activity is (B,128) padded — recon targets first 20 cols (real HRV)
@@ -161,13 +170,13 @@ def main():
                 else:
                     activity, mobility, labels = [x.to(CFG["device"]) for x in batch_data]
 
-                audio = get_dummy_audio(activity.shape[0], CFG["device"])
-                if args.no_voice:    audio    = torch.zeros_like(audio)
+                voice_emb = get_voice_emb(activity.shape[0], CFG["device"])
+                if args.no_voice:    voice_emb = torch.zeros_like(voice_emb)
                 if args.no_activity: activity = torch.zeros_like(activity)
                 if args.no_mobility: mobility = torch.zeros_like(mobility)
 
                 with torch.amp.autocast("cuda", enabled=(CFG["device"] == "cuda")):
-                    logits, _, _, _ = model(audio, activity, mobility)
+                    logits, _, _, _ = model(voice_emb=voice_emb, activity=activity, mobility=mobility)
                 all_preds.extend(logits.argmax(-1).cpu().tolist())
                 all_labels.extend(labels.cpu().tolist())
 
@@ -197,7 +206,7 @@ def main():
             best_val_f1 = val_f1
             torch.save(model.state_dict(),
                        os.path.join(CFG["ckpt_dir"], "best_model.pt"))
-            print(f"  * New best model (val_f1={val_f1:.4f})")
+            print(f"  ★ New best model (val_f1={val_f1:.4f})")
 
     print(f"\nTraining complete. Best val F1: {best_val_f1:.4f}")
     if WANDB_AVAILABLE:
