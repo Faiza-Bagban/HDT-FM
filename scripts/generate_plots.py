@@ -258,10 +258,16 @@ os.makedirs("results/figures", exist_ok=True)
 # ─────────────────────────────────────────────────────────────────────────────
 # From subject-held-out eval: F1=0.9918
 # baseline=14390, amusement=4610, stress=8596
+# cm = np.array([
+#     [14221, 159,    10],   # Baseline
+#     [2,     4608,    0],   # Amusement
+#     [0,     58,   8538],   # Stress
+# ])
+
 cm = np.array([
-    [14221, 159,    10],   # Baseline
-    [2,     4608,    0],   # Amusement
-    [0,     58,   8538],   # Stress
+    [10370, 3068,  952],   # Baseline
+    [2160,  1491,  959],   # Amusement
+    [781,   1247, 6568],   # Stress
 ])
 
 fig, ax = plt.subplots(figsize=(7, 6))
@@ -288,25 +294,32 @@ print("✓ confusion_matrix")
 # FIGURE 2 — Training Loss Curve
 # ─────────────────────────────────────────────────────────────────────────────
 epochs  = list(range(30))
-losses  = [0.4666,0.2047,0.1392,0.1114,0.0936,0.0821,0.0717,0.0600,0.0564,0.0488,
-           0.0417,0.0374,0.0332,0.0295,0.0273,0.0186,0.0175,0.0158,0.014,0.012,
-           0.010,0.009,0.008,0.007,0.006,0.005,0.004,0.003,0.002,0.0009]
-val_f1s = [0.9123,0.9634,0.9757,0.9793,0.9817,0.9911,0.9891,0.9936,0.9937,0.9922,
-           0.9910,0.9926,0.9965,0.9976,0.9980,0.9989,0.9989,0.9993,0.9993,0.9994,
-           0.9995,0.9996,0.9997,0.9998,0.9998,0.9999,0.9999,0.9999,1.000,1.000]
+# losses  = [0.4666,0.2047,0.1392,0.1114,0.0936,0.0821,0.0717,0.0600,0.0564,0.0488,
+#            0.0417,0.0374,0.0332,0.0295,0.0273,0.0186,0.0175,0.0158,0.014,0.012,
+#            0.010,0.009,0.008,0.007,0.006,0.005,0.004,0.003,0.002,0.0009]
+# val_f1s = [0.9123,0.9634,0.9757,0.9793,0.9817,0.9911,0.9891,0.9936,0.9937,0.9922,
+#            0.9910,0.9926,0.9965,0.9976,0.9980,0.9989,0.9989,0.9993,0.9993,0.9994,
+#            0.9995,0.9996,0.9997,0.9998,0.9998,0.9999,0.9999,0.9999,1.000,1.000]
 
+
+losses  = [0.4649,0.2232,0.1556,0.1287,0.1146,0.1078,0.0994,0.0921,0.0960,0.0865,
+           0.0848,0.0815,0.0760,0.0739,0.0757,0.0913,0.0704,0.0612,0.0540,0.0444,
+           0.0404,0.0369,0.0310,0.0224,0.0219,0.0197,0.0185,0.0160,0.0149,0.0139]
+val_f1s = [0.5990,0.5579,0.6300,0.5597,0.6489,0.6244,0.6511,0.6365,0.6624,0.6527,
+           0.6623,0.6761,0.6635,0.6697,0.6364,0.6312,0.6385,0.6335,0.6168,0.6056,
+           0.6137,0.6227,0.6329,0.6307,0.6340,0.6300,0.6371,0.6439,0.6389,0.6382]
 fig, ax1 = plt.subplots(figsize=(9, 5))
 ax2 = ax1.twinx()
 l1, = ax1.plot(epochs, losses,  color='#C0392B', linewidth=2.5, label='Train Loss')
 l2, = ax2.plot(epochs, val_f1s, color='#1A2F5E', linewidth=2.5,
-               linestyle='--', label='Val F1 (within-subject)')
+               linestyle='--', label='Val F1 (subject-held-out)')
 ax1.set_xlabel("Epoch", fontsize=16, fontweight='bold')
 ax1.set_ylabel("Training Loss", color='#C0392B', fontsize=16, fontweight='bold')
 ax2.set_ylabel("Val F1 Score",  color='#1A2F5E', fontsize=16, fontweight='bold')
 ax1.tick_params(axis='both', labelcolor='#C0392B', labelsize=16)
 ax2.tick_params(axis='both', labelcolor='#1A2F5E', labelsize=16)
 # ax1.set_title("HDT-FM Training Curve (Full Fusion, 30 Epochs)", fontsize=16, fontweight='bold')
-ax1.legend(handles=[l1, l2], loc='center right', fontsize=16, prop={'weight':'bold'})
+ax1.legend(handles=[l1, l2], loc='upper right', fontsize=16, prop={'weight':'bold'})
 ax1.grid(alpha=0.3)
 for spine in ax1.spines.values():
     spine.set_visible(True)
@@ -434,10 +447,14 @@ print("✓ class_distribution")
 # ─────────────────────────────────────────────────────────────────────────────
 # FIGURE 6 — Subject-wise F1 Score Bar
 # ─────────────────────────────────────────────────────────────────────────────
+# all_subjects = [f'S{i}' for i in [2,3,4,5,6,7,8,9,10,11,13,14,15,16,17]]
+# # train subjects get ~0.99+ (within-subject), val subjects get real held-out F1
+# f1_by_subj = [0.99,0.99,0.98,0.99,0.99,0.98,0.99,0.99,0.98,0.99,0.99,0.98,
+#               0.9918, 0.9918, 0.9918]
+
 all_subjects = [f'S{i}' for i in [2,3,4,5,6,7,8,9,10,11,13,14,15,16,17]]
-# train subjects get ~0.99+ (within-subject), val subjects get real held-out F1
 f1_by_subj = [0.99,0.99,0.98,0.99,0.99,0.98,0.99,0.99,0.98,0.99,0.99,0.98,
-              0.9918, 0.9918, 0.9918]
+              0.5069, 0.8630, 0.6532]
 colors_subj = ['#5B9BD5']*12 + ['#1A2F5E']*3
 
 fig, ax = plt.subplots(figsize=(13, 5))
@@ -448,8 +465,8 @@ ax.set_ylabel("Weighted F1", fontsize=16, fontweight='bold')
 # ax.set_title("Per-Subject F1 Score\n(Blue=Train, Dark=Held-Out Val S15–S17)",
             #  fontsize=16, fontweight='bold')
 ax.tick_params(axis='both', labelsize=14)
-ax.axhline(y=0.9918, color='green', linestyle='--', linewidth=1.5,
-           label='Subject-held-out F1 (0.9918)')
+ax.axhline(y=0.6779, color='green', linestyle='--', linewidth=1.5,
+           label='Subject-held-out F1 (0.6779)')
 ax.legend(fontsize=14, prop={'weight':'bold'})
 ax.grid(axis='y', alpha=0.3)
 for spine in ax.spines.values():
