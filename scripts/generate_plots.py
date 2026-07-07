@@ -320,7 +320,15 @@ print("✓ loss_curve")
 # FIGURE 3 — Ablation Bar Chart
 # ─────────────────────────────────────────────────────────────────────────────
 variants = ["Voice Only", "Activity Only\n(HRV)", "Full Fusion\n(Proposed)"]
-f1_vals  = [0.1480, 0.9912, 0.9918]
+# f1_vals  = [0.1480, 0.9912, 0.9918] #Yeshita
+
+#Samratth's updated values
+
+variants = ["Voice Only", "Activity Only\n(HRV)", "Voice+Activity", "Full Fusion\n(Proposed)"]
+f1_vals  = [0.1480, 0.6679, 0.6779, 0.6779]
+colors   = ['#AED6F1', '#5B9BD5', '#7FB3D3', '#1A2F5E']
+
+
 colors   = ['#AED6F1', '#5B9BD5', '#1A2F5E']
 
 fig, ax = plt.subplots(figsize=(8, 5))
@@ -348,10 +356,15 @@ print("✓ ablation_bar")
 # ─────────────────────────────────────────────────────────────────────────────
 # FIGURE 4 — Per-Class Performance
 # ─────────────────────────────────────────────────────────────────────────────
+# classes   = ["Baseline", "Amusement", "Stress"]
+# precision = [1.00, 0.96, 1.00]
+# recall_v  = [0.99, 1.00, 0.99]
+# f1_per    = [0.99, 0.98, 1.00]
+
 classes   = ["Baseline", "Amusement", "Stress"]
-precision = [1.00, 0.96, 1.00]
-recall_v  = [0.99, 1.00, 0.99]
-f1_per    = [0.99, 0.98, 1.00]
+precision = [0.78, 0.26, 0.77]
+recall_v  = [0.72, 0.32, 0.76]
+f1_per    = [0.75, 0.29, 0.77]
 
 x     = np.arange(len(classes))
 width = 0.25
@@ -362,14 +375,17 @@ ax.bar(x + width, f1_per,    width, label='F1-Score',  color='#1A2F5E', edgecolo
 ax.set_xticks(x)
 ax.set_xticklabels(classes, fontsize=16, fontweight='bold')
 # ax.set_ylim(0, 1.10)
-ax.set_ylim(0, 1.28)
+# ax.set_ylim(0, 1.28)
+ax.set_ylim(0, 1.05)
 ax.set_ylabel("Score", fontsize=16, fontweight='bold')
 # ax.set_title("HDT-FM Per-Class Performance\n(Subject-Held-Out: S15–S17)",
             #  fontsize=16, fontweight='bold')
 ax.tick_params(axis='y', labelsize=16)
 # ax.legend(fontsize=16, prop={'weight':'bold'})
-ax.legend(fontsize=16, prop={'weight':'bold'}, loc='upper right',
-          borderaxespad=0.5, framealpha=0.95)
+# ax.legend(fontsize=16, prop={'weight':'bold'}, loc='upper right',
+        #   borderaxespad=0.5, framealpha=0.95)
+
+ax.legend(fontsize=16, prop={'weight':'bold'}, loc='upper right')
 ax.grid(axis='y', alpha=0.3)
 for i, (p, r, f) in enumerate(zip(precision, recall_v, f1_per)):
     ax.text(i - width, p + 0.02, f'{p:.2f}', ha='center', fontsize=14, fontweight='bold')
