@@ -216,3 +216,21 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Data files - never push
+data/CREMA/
+data/VOICE_subset/
+data/WESAD/
+data/embeddings/
+*.wav
+*.npy
+*.pkl
+# Model weights
+runs/
+runs_proper/
+runs_voice/
+*.pt
+*.pth
+# Results kept except figures
+results/ablation*.csv
+
